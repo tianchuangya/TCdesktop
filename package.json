@@ -1,0 +1,56 @@
+{
+  "name": "tcdesktop",
+  "productName": "TCdesktop",
+  "version": "0.2.0",
+  "private": true,
+  "description": "TCdesktop — 云屿/Orbit，一个把 Windows 桌面替换成沉浸式桌面管理器的 Electron 应用。",
+  "author": "TCdesktop",
+  "license": "MIT",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "check": "node --check main.js && node --check preload.js && node --check src/app.js && node --check src/wallpaper-3d.js && node --check src/shelf-3d.js",
+    "dist": "electron-builder --win nsis",
+    "dist:dir": "electron-builder --dir"
+  },
+  "devDependencies": {
+    "electron": "^42.4.1",
+    "electron-builder": "^26.0.12"
+  },
+  "dependencies": {
+    "NeteaseCloudMusicApi": "^4.32.0"
+  },
+  "build": {
+    "appId": "com.tcdesktop.app",
+    "productName": "TCdesktop",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "desktop-runtime/**/*",
+      "src/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "${productName}-${version}-setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "TCdesktop"
+    }
+  }
+}

@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>TCdesktop</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="skin-xinghui light-mode">
+  <div class="wallpaper-space" id="wallpaperSpace" aria-hidden="true">
+    <video class="wallpaper-video" id="wallpaperVideo" muted loop playsinline preload="auto"></video>
+    <div class="wallpaper-plane plane-back"></div>
+    <div class="wallpaper-plane plane-main" id="wallpaperPlane"></div>
+    <div class="wallpaper-plane plane-light"></div>
+    <div class="wallpaper-mesh"></div>
+    <canvas id="wallpaper3d"></canvas>
+  </div>
+  <canvas id="space" aria-hidden="true"></canvas>
+  <canvas id="shelf3d" aria-label="3D 文件星架"></canvas>
+  <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
+  <div class="edge-cue cue-left"></div><div class="edge-cue cue-right"></div><div class="edge-cue cue-top"></div><div class="edge-cue cue-bottom"></div>
+  <aside class="desktop-observatory" id="desktopObservatory" aria-label="桌面轨道遥测托盘">
+    <button class="desktop-mini-galaxy" id="desktopMiniGalaxy" type="button" title="返回桌面根目录" aria-label="返回桌面根目录">
+      <span class="telemetry-head"><span class="telemetry-signal" aria-hidden="true"></span><span>HOME VECTOR</span><strong id="miniVectorState">HOME</strong></span>
+      <span class="telemetry-main">
+        <span class="mini-orbit" aria-hidden="true"><span class="mini-core">桌</span><span class="orbit-mark mark-a"></span><span class="orbit-mark mark-b"></span></span>
+        <span class="telemetry-copy"><strong>桌面基站</strong><span id="miniPathLabel">Desktop</span><small>点击返回根目录</small></span>
+      </span>
+      <span class="telemetry-readout"><span><small>OBJECTS</small><b id="miniObjectCount">00</b></span><span><small>ROUTE</small><b id="miniRouteState">READY</b></span></span>
+    </button>
+    <div class="favorite-galaxy-tray" id="favoriteGalaxyTray" role="navigation" aria-label="常用星系托盘"></div>
+  </aside>
+  <nav class="primary-orbit-dock" id="primaryOrbitDock" aria-label="主轨道"></nav>
+
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand" aria-label="TCdesktop">
+        <span class="brand-orbit"><i></i></span>
+        <div><strong>ORBIT</strong><span>DESK / 本地轨道</span></div>
+      </div>
+      <button class="search" id="searchButton" type="button">
+        <span class="search-icon">⌕</span><span id="searchLabel">搜索文件、应用或输入命令</span><kbd>Ctrl K</kbd>
+      </button>
+      <div class="window-tools">
+        <button class="pill live" id="desktopModeBadge"><i></i> 桌面层</button>
+        <button class="icon-button" id="styleButton" title="样式仓">◐</button>
+        <button class="window-button" data-win="minimize">—</button>
+        <button class="window-button" data-win="maximize">□</button>
+        <button class="window-button close" data-win="close">×</button>
+      </div>
+    </header>
+
+    <section class="cloud-desk" id="cloudDesk" aria-label="云屿桌面管理器">
+      <aside class="cloud-sidebar" aria-label="文件分类">
+        <div class="cloud-profile">
+          <span class="cloud-avatar"></span>
+          <div>
+            <strong></strong>
+            <small id="cloudRootPath">正在定位桌面</small>
+          </div>
+        </div>
+        <nav class="cloud-nav" id="cloudGroupList"></nav>
+        <div class="cloud-actions">
+          <button id="cloudAllButton" type="button">全部对象 <span id="cloudTotalCount">0</span></button>
+        </div>
+      </aside>
+      <main class="cloud-main" aria-label="桌面文件工作区">
+        <section class="cloud-hero">
+          <div>
+            <span class="cloud-kicker" id="cloudKicker">DESKTOP LIBRARY</span>
+            <h1 id="cloudTitle">正在读取桌面</h1>
+            <p id="cloudCaption">以博客文章流的方式整理桌面文件、项目与快捷方式。</p>
+          </div>
+        </section>
+        <section class="cloud-columns">
+          <div class="cloud-feed-card">
+            <div class="cloud-section-head">
+              <div><span>文件流</span><h2 id="cloudListTitle">全部对象</h2></div>
+              <strong id="cloudCountBadge">0</strong>
+            </div>
+            <div class="cloud-file-list" id="cloudFileList"></div>
+          </div>
+          <aside class="cloud-inspector">
+            <span class="cloud-kicker">DETAILS</span>
+            <h2 id="cloudFocusTitle">未选择对象</h2>
+            <p id="cloudFocusMeta">从左侧文件流选择一个文件或文件夹查看详情。</p>
+            <div class="cloud-inspector-actions">
+              <button id="cloudOpenButton" type="button" disabled>打开</button>
+              <button id="cloudRevealButton" type="button" disabled>定位</button>
+              <button id="cloudCopyButton" type="button" disabled>复制路径</button>
+            </div>
+          </aside>
+        </section>
+      </main>
+    </section>
+    <button class="cloud-path-float" id="cloudPathButton" type="button" title="点击复制当前路径，双击返回上一级"><span>当前位置</span><b id="cloudPathText">Desktop</b></button>
+    <div class="cloud-top-actions" id="cloudTopActions">
+      <button id="cloudNewFileButton" type="button">新建文件</button>
+      <button id="cloudConsoleButton" type="button">指令台</button>
+      <button id="cloudStyleButton" type="button">样式设置</button>
+    </div>
+    <div class="cloud-clock-widget" id="cloudClockWidget"><span id="cloudClockTime">00:00</span><b id="cloudClockDate">Desktop time</b></div>
+    <section class="ai-assistant" id="aiAssistant" data-cloud-block="ai-assistant" aria-label="AI 助手">
+      <button class="ai-grokbot-trigger" id="aiGrokbotTrigger" type="button" title="AI 助手"><span class="ai-grokbot-face" id="aiGrokbotFace"></span></button>
+      <div class="ai-simple-bar" id="aiSimpleBar" hidden>
+        <div class="ai-simple-bubble" id="aiSimpleBubble" hidden></div>
+        <textarea class="ai-simple-input" id="aiSimpleInput" rows="1" placeholder="问点什么… Enter 发送，Ctrl+Enter 换行" spellcheck="false"></textarea>
+      </div>
+    </section>
+    <div class="ai-panel" id="aiPanel" hidden>
+      <div class="ai-panel-head"><b>AI 助手</b><span id="aiStateLabel">待机</span><button id="aiModeToggle" type="button" title="切换简略/完整模式">💬</button><button id="aiConfigToggle" type="button" title="配置 API">⚙</button><button id="aiClose" type="button" aria-label="关闭">×</button></div>
+      <div class="ai-panel-grokbot" id="aiPanelGrokbot"></div>
+      <div class="ai-chat" id="aiChat"></div>
+      <div class="ai-input-row">
+        <textarea id="aiInput" rows="1" placeholder="输入消息，Enter 发送，Ctrl+Enter 换行" spellcheck="false"></textarea>
+        <button id="aiSend" type="button">发送</button>
+      </div>
+      <div class="ai-config" id="aiConfig" hidden>
+        <label>API Key <input id="aiKey" type="password" placeholder="sk-..." spellcheck="false"></label>
+        <label>Base URL <input id="aiBaseUrl" type="text" placeholder="https://api.openai.com/v1" spellcheck="false"></label>
+        <label>模型 <input id="aiModel" type="text" placeholder="gpt-4o-mini" spellcheck="false"></label>
+        <button id="aiSaveConfig" type="button">保存配置</button>
+      </div>
+    </div>
+    <section class="lyric-widget" id="lyricWidget" data-cloud-block="lyrics" aria-label="歌词浮窗">
+      <div class="lyric-head">
+        <span class="lyric-cover" id="lyricCover"></span>
+        <div>
+          <span class="lyric-source" id="lyricStatus">后台歌词 · 待连接</span>
+          <b id="lyricSongTitle">音乐未播放</b>
+          <small id="lyricSongArtist">可检测网易云 / QQ音乐 / 酷狗等后台播放器</small>
+        </div>
+      </div>
+      <p id="lyricLineA">等待播放器状态</p>
+      <p id="lyricLineB">可在块设置里选择未启动时隐藏或只显示背景图</p>
+      <div class="lyric-controls">
+        <button data-media-action="previous" type="button" title="上一首" aria-label="上一首"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M11 6 5 12l6 6"/><path d="M19 6l-6 6 6 6"/></svg></button>
+        <button data-media-action="playpause" type="button" title="播放 / 暂停" aria-label="播放或暂停"><svg class="lyric-icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 5.2v13.6L19 12z"/></svg><svg class="lyric-icon-pause" viewBox="0 0 24 24" fill="currentColor" hidden><path d="M7 5h4.2v14H7z"/><path d="M12.8 5H17v14h-4.2z"/></svg></button>
+        <button data-media-action="next" type="button" title="下一首" aria-label="下一首"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M13 6l6 6-6 6"/><path d="M5 6l6 6-6 6"/></svg></button>
+      </div>
+      <button id="lyricVolumeButton" class="lyric-volume-tab" type="button" title="音量" aria-label="音量设置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z"/><path d="M15.5 8.8a4.6 4.6 0 0 1 0 6.4"/><path d="M18.2 6.2a8 8 0 0 1 0 11.6"/></svg></button>
+    </section>
+    <div class="cloud-context-menu" id="cloudContextMenu" hidden></div>
+    <div class="cloud-block-settings" id="cloudBlockSettings" hidden>
+      <div><b id="cloudBlockSettingsTitle">块设置</b><button id="cloudBlockSettingsClose" type="button">×</button></div>
+      <p>Alt + 右键可针对单个块调整。当前版本先提供入口，后续接入透明度、描边、阴影、字体、壁纸。</p>
+    </div>
+
+    <aside class="rail glass-panel">
+      <div class="rail-heading"><span>桌面航道</span><button id="rescanButton" title="重新扫描">↻</button></div>
+      <nav id="groupList" class="group-list"></nav>
+      <div class="rail-divider"></div>
+      <button class="utility-row" id="allItemsButton"><span>✦</span><b>全部对象</b><em id="totalCount">0</em></button>
+      <button class="utility-row" id="consoleButton"><span>›_</span><b>指令台</b><em>Ctrl `</em></button>
+      <button class="utility-row" id="newFileButton"><span>＋</span><b>新建文件</b><em>NEW</em></button>
+      <button class="utility-row" id="toggleIconsButton"><span>◌</span><b>桌面原图标</b><em>切换</em></button>
+      <div class="profile-card">
+        <div class="profile-sigil">OD</div>
+        <div><b>本机桌面</b><span id="desktopRoot">正在定位…</span></div>
+        <i class="status-dot"></i>
+      </div>
+    </aside>
+
+    <section class="stage" aria-label="项目星系视图">
+      <div class="stage-meta">
+        <span class="eyebrow" id="stageEyebrow">PROJECT GALAXY · 01</span>
+        <h1 id="stageTitle">正在读取桌面</h1>
+        <p id="stageCaption">让项目成为中心，让文件回到轨道。</p>
+      </div>
+      <button class="path-ring" id="pathRing" title="单击复制路径，双击进入上一级">
+        <span>PATH /</span><b id="pathText">DESKTOP</b><i>点击复制</i>
+      </button>
+      <div class="system-core" id="systemCore">
+        <button class="core-back" id="coreBackButton" title="返回上一级">←</button>
+        <div class="path-ribbon" id="pathRibbon" title="点击复制路径，双击返回上一级"><span id="pathRibbonText">DESKTOP</span></div>
+        <div class="core-halo halo-one"></div><div class="core-halo halo-two"></div>
+        <div class="core-glyph" id="coreGlyph">OD</div>
+        <div class="core-label"><span>当前焦点</span><strong id="coreTitle">桌面</strong><small id="coreMeta">0 个对象</small></div>
+      </div>
+      <div id="orbitNodes" class="orbit-nodes" aria-live="polite"></div>
+      <div class="view-controls">
+        <button id="backButton" title="返回上一级">↰</button>
+        <span></span>
+        <button id="motionButton" class="active" title="暂停背景动态">≈</button>
+        <button id="densityButton" title="调整粒子密度">⁙</button>
+        <button id="focusButton" title="聚焦中央">◎</button>
+      </div>
+    </section>
+
+    <aside class="shelf glass-panel">
+      <div class="shelf-head">
+        <div><span id="shelfKicker">DESKTOP INDEX</span><h2 id="shelfTitle">项目星系</h2></div>
+        <span class="count-badge" id="shelfCount">0</span>
+      </div>
+      <div class="sort-row"><span>名称与轨道</span><span>类型</span></div>
+      <div class="item-list" id="itemList"></div>
+      <div class="shelf-foot"><span><i></i> 双击打开</span><span>右键定位</span></div>
+    </aside>
+
+    <section class="command-palette glass-panel" id="commandPalette" hidden>
+      <div class="command-input-row"><span>›_</span><input id="commandInput" autocomplete="off" spellcheck="false" placeholder="输入 cd、dir、open、copy、pwd 或搜索内容"><button class="command-close" id="closeCommandPalette" type="button" aria-label="关闭指令台">×</button></div>
+      <div id="commandOutput" class="command-output"><p><b>TCdesktop 指令台</b> · 输入 <code>help</code> 查看命令</p></div>
+    </section>
+
+    <section class="style-drawer glass-panel" id="styleDrawer" hidden>
+      <div class="drawer-head"><div><span>STYLE HUB · 全局</span><h2>样式仓</h2></div><button id="closeStyle">×</button></div>
+      <div class="preset-grid" id="presetGrid"></div>
+      <div class="visual-settings"><span>皮肤包</span>
+        <div class="flow-control"><span>桌面外观</span><div id="skinModes"><button data-skin="orbit">星系</button><button data-skin="xinghui">云屿</button></div></div>
+      </div>
+      <div class="cloud-global-appearance" id="cloudGlobalAppearance">
+        <label class="control-label">玻璃透明度 <output id="cloudGlassAlphaValue">0%</output><input id="cloudGlassAlphaRange" type="range" min="0" max="100" value="0"></label>
+        <label class="control-label">边缘亮度 <output id="cloudBorderAlphaValue">56%</output><input id="cloudBorderAlphaRange" type="range" min="0" max="100" value="56"></label>
+        <label class="control-label">模糊强度 <output id="cloudGlassBlurValue">12px</output><input id="cloudGlassBlurRange" type="range" min="0" max="60" value="12"></label>
+        <label class="control-label">字体大小 <output id="cloudFontScaleValue">100%</output><input id="cloudFontScaleRange" type="range" min="70" max="180" value="100"></label>
+        <label class="control-label">文本颜色 <input id="cloudTextRgbColor" type="color" value="#ffffff"><input id="cloudTextRgbInput" class="inline-text-input" type="text" value="255,255,255" spellcheck="false"></label>
+        <label class="control-label">边框颜色 <input id="cloudBorderRgbColor" type="color" value="#ffffff"><input id="cloudBorderRgbInput" class="inline-text-input" type="text" value="255,255,255" spellcheck="false"></label>
+        <div class="flow-control"><span>全局边框镂空</span><div id="cloudHollowModes"><button data-cloud-hollow="on">开启</button><button data-cloud-hollow="off">关闭</button></div></div>
+        <div class="flow-control"><span>块背景图</span><div id="cloudPanelImageModes"><button data-cloud-panel-image="on">加载</button><button data-cloud-panel-image="off">关闭</button></div></div>
+        <label class="control-label startup-check"><input id="autoStartToggle" type="checkbox"> 开机自启（随 Windows 启动）</label>
+      </div>
+      <div class="flow-control"><span>壁纸来源</span><div id="wallpaperSourceModes"><button data-wallpaper-source="wallpaper-engine">当前 Wallpaper</button><button data-wallpaper-source="library">壁纸库</button></div></div>
+      <div class="wallpaper-library">
+        <div class="wallpaper-library-head"><span id="wallpaperLibraryTitle">壁纸库</span><button id="importWallpaper" type="button">导入壁纸</button></div>
+        <input class="wallpaper-search" id="wallpaperSearch" type="search" placeholder="搜索壁纸库">
+        <div class="wallpaper-grid" id="wallpaperGrid"></div>
+      </div>
+      <div class="drawer-actions background-action"><button id="chooseBackground">临时选择图片 / 动态背景</button></div>
+      <div class="visual-settings"><span>主题颜色</span>
+        <div class="flow-control"><span>明暗模式</span><div id="themeModeModes"><button data-theme-mode="dark">深色</button><button data-theme-mode="light">浅色</button></div></div>
+        <label class="control-label">色相 <output id="themeHueValue">185</output><input id="themeHueRange" type="range" min="0" max="360" value="185"></label>
+        <label class="control-label">饱和度 <output id="themeSatValue">72%</output><input id="themeSatRange" type="range" min="0" max="100" value="72"></label>
+        <label class="control-label">界面不透明度 <output id="themeAlphaValue">46%</output><input id="themeAlphaRange" type="range" min="18" max="86" value="46"></label>
+        <label class="control-label">RGB 快速输入 <input id="themeRgbInput" class="inline-text-input" type="text" value="159,233,239" spellcheck="false"></label>
+      </div>
+      <label class="control-label">背景运动 <output id="motionValue">52%</output><input id="motionRange" type="range" min="0" max="100" value="52"></label>
+      <label class="control-label">粒子密度 <output id="densityValue">64%</output><input id="densityRange" type="range" min="20" max="140" value="64"></label>
+      <div class="visual-settings"><span>画面设置</span>
+        <div class="flow-control"><span>粒子刷新帧率</span><div id="particleFpsModes"><button data-particle-fps="15">15</button><button data-particle-fps="30">30</button><button data-particle-fps="45">45</button><button data-particle-fps="60">60</button><button data-particle-fps="120">120</button></div></div>
+        <div class="flow-control"><span>未激活时帧率</span><div id="inactiveFpsModes"><button data-inactive-fps="pause">暂停</button><button data-inactive-fps="5">5</button><button data-inactive-fps="10">10</button><button data-inactive-fps="15">15</button></div></div>
+        <label class="control-label">逐级加载速度 <output id="loadSpeedValue">80%</output><input id="loadSpeedRange" type="range" min="35" max="140" value="80"></label>
+        <label class="control-label">逐级间隔时间 <output id="loadGapValue">0.45s</output><input id="loadGapRange" type="range" min="100" max="1200" step="50" value="450"></label>
+      </div>
+      <label class="control-label">壁纸原图不透明度 <output id="wallpaperOpacityValue">10%</output><input id="wallpaperOpacityRange" type="range" min="0" max="100" value="10"></label>
+      <label class="control-label">壁纸亮度 <output id="wallpaperBrightnessValue">116%</output><input id="wallpaperBrightnessRange" type="range" min="60" max="180" value="116"></label>
+      <label class="control-label">壁纸饱和度 <output id="wallpaperSaturationValue">118%</output><input id="wallpaperSaturationRange" type="range" min="40" max="220" value="118"></label>
+      <label class="control-label">粒子不透明度 <output id="particleOpacityValue">82%</output><input id="particleOpacityRange" type="range" min="10" max="100" value="82"></label>
+      <label class="control-label">壁纸模糊 <output id="wallpaperBlurValue">3px</output><input id="wallpaperBlurRange" type="range" min="0" max="30" value="3"></label>
+      <label class="control-label">浮窗模糊 <output id="panelBlurValue">18px</output><input id="panelBlurRange" type="range" min="0" max="40" value="18"></label>
+      <label class="control-label">3D 透视强度 <output id="perspectiveValue">72%</output><input id="perspectiveRange" type="range" min="20" max="100" value="72"></label>
+      <label class="control-label">3D 浮窗缩放 <output id="shelfScaleValue">82%</output><input id="shelfScaleRange" type="range" min="45" max="110" value="82"></label>
+      <label class="control-label">路径环速度 <output id="pathSpeedValue">115%</output><input id="pathSpeedRange" type="range" min="50" max="220" value="115"></label>
+      <div class="flow-control"><span>当前焦点</span><div id="focusDisplayModes"><button data-focus-display="detailed">详细球体</button><button data-focus-display="simple">简略文字</button></div></div>
+      <label class="control-label">焦点横向位置 <output id="focusXValue">50%</output><input id="focusXRange" type="range" min="0" max="100" value="50"></label>
+      <label class="control-label">焦点纵向位置 <output id="focusYValue">50%</output><input id="focusYRange" type="range" min="0" max="100" value="50"></label>
+      <div class="flow-control"><span>粒子流场</span><div id="flowModes"><button data-flow="wave">海浪</button><button data-flow="wind">风场</button><button data-flow="breath">呼吸</button></div></div>
+      <div class="visual-settings particle-position-settings">
+        <div class="particle-position-head"><span>粒子定位</span><small id="particlePositionState">自由悬浮</small></div>
+        <p class="particle-position-help">移动的只是粒子层，不会裁切或移动原壁纸。</p>
+        <div class="flow-control"><span>粒子特效</span><div id="thumbnailModes"><button data-thumbnail-enabled="true">开启</button><button data-thumbnail-enabled="false">关闭</button></div></div>
+        <div class="flow-control"><span>粒子呈现</span><div id="particleModes"><button data-particle-mode="center">立体悬浮</button><button data-particle-mode="edge">贴合原图</button></div></div>
+        <label class="control-label">粒子横向位置 <output id="thumbnailXValue">50.0%</output><input id="thumbnailXRange" type="range" min="0" max="100" step="0.1" value="50"></label>
+        <label class="control-label">粒子纵向位置 <output id="thumbnailYValue">50.0%</output><input id="thumbnailYRange" type="range" min="0" max="100" step="0.1" value="50"></label>
+        <div class="drawer-actions particle-position-actions"><button id="pickParticlePosition" type="button">在画面中拖动</button><button id="resetParticlePosition" type="button">回到原图位置</button></div>
+      </div>
+      <div class="visual-settings source-region-settings">
+        <span>源图取样区域</span>
+        <p class="particle-position-help">选中后粒子会保持选区在原图中的位置和比例。</p>
+        <div class="flow-control"><span>选区形状</span><div id="thumbnailShapes"><button data-thumbnail-shape="rect">矩形</button><button data-thumbnail-shape="circle">圆形</button><button data-thumbnail-shape="ellipse">椭圆</button><button data-thumbnail-shape="polygon">多边形</button></div></div>
+        <div class="drawer-actions particle-region-actions"><button id="pickThumbnailRegion" type="button">选取粒子区域</button><button id="clearParticleRegion" type="button">使用整张原图</button></div>
+      </div>
+      <div class="drawer-actions"><button id="importStyle">导入样式</button><button id="exportStyle">导出当前样式</button></div>
+    </section>
+
+    <div class="toast" id="toast" role="status"></div>
+  </main>
+  <section class="new-file-dialog glass-panel" id="newFileDialog" hidden>
+    <div class="new-file-head"><span>NEW DESKTOP ITEM</span><button id="closeNewFile" type="button">×</button></div>
+    <label class="control-label">文件名 <input id="newFileName" class="inline-text-input" type="text" value="新建文件.txt" spellcheck="false"></label>
+    <label class="control-label">目标路径 <input id="newFilePath" class="inline-text-input" type="text" spellcheck="false"></label>
+    <div class="drawer-actions"><button id="chooseNewFilePath" type="button">选择路径</button><button id="confirmNewFile" type="button">创建文件</button></div>
+    <p class="particle-position-help">默认创建在当前桌面/当前目录；选择路径后会在指定文件夹中创建。</p>
+  </section>
+  <div class="region-picker" id="regionPicker" hidden>
+    <div class="region-tip">拖拽选择壁纸区域 · Enter 确认 · Esc 取消</div>
+    <div class="region-box" id="regionBox"></div>
+    <div class="region-picker-actions"><button id="cancelThumbnailRegion" type="button">取消选区</button><button id="confirmThumbnailRegion" type="button">确认选区</button></div>
+  </div>
+  <div class="particle-position-picker" id="particlePositionPicker" hidden>
+    <div class="particle-position-tip"><strong>拖动定位粒子</strong><span>按住任意位置拖动 · Enter 保存 · Esc 取消</span></div>
+    <div class="particle-position-anchor" id="particlePositionAnchor"><i></i><span>原图位置</span></div>
+    <div class="particle-position-target" id="particlePositionTarget"><i></i><span>当前粒子</span></div>
+    <div class="particle-position-picker-actions"><button id="cancelParticlePosition" type="button">取消</button><button id="confirmParticlePosition" type="button">保存位置</button></div>
+  </div>
+  <script src="../../Mineradio-main/public/vendor/three.r128.min.js"></script>
+  <script src="wallpaper-3d.js"></script>
+  <script src="shelf-3d.js"></script>
+  <script src="grokbot-data.js"></script>
+  <script src="grokbot.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
